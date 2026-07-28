@@ -55,6 +55,17 @@ function pick<T>(arr: T[], r: number): T {
   return arr[Math.floor(r * arr.length) % arr.length];
 }
 
+/** Deterministic shuffle — never use Array.sort with a random comparator
+ *  (engines call it a different number of times, desyncing the RNG). */
+function shuffle<T>(arr: T[], rand: () => number): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 const ROLE_STANCE: Record<AgentRole, VoteSide> = {
   Advocate: "believe",
   Skeptic: "cope",
@@ -202,8 +213,8 @@ function buildAgent(
   };
 
   const lib = libraries[role];
-  const args = [...lib.args].sort(() => rand() - 0.5).slice(0, 3);
-  const ev = [...lib.ev].sort(() => rand() - 0.5).slice(0, 2);
+  const args = shuffle(lib.args, rand).slice(0, 3);
+  const ev = shuffle(lib.ev, rand).slice(0, 2);
 
   return {
     id: `agent_${role.replace(/\s+/g, "_").toLowerCase()}`,
@@ -255,7 +266,8 @@ export function generateDebate(seed: BeliefSeed): Debate {
         )}% of the time.`,
       },
     ],
-    generatedAt: new Date().toISOString(),
+    // Fixed epoch so SSR and client module evaluation stay in sync.
+    generatedAt: new Date(1_700_000_000_000 + Math.floor(seedFrom(seed.title) * 86_400_000)).toISOString(),
   };
 }
 
