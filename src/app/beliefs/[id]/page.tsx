@@ -122,7 +122,7 @@ function PinnedBeliefCard({ belief }: { belief: Belief }) {
           {belief.title}
         </h1>
         <p className="mt-2 text-sm text-content-secondary">
-          Being stress-tested by the HoodSwarm Engine.
+          Being stress-tested by the Belief Market Engine.
         </p>
       </div>
 

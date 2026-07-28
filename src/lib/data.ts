@@ -105,7 +105,7 @@ export const users: User[] = [
 ];
 
 export const currentUser: User = {
-  id: "me", username: "you", name: "You", avatar: avatarFor("hoodswarm-you"),
+  id: "me", username: "you", name: "You", avatar: avatarFor("belief-market-you"),
   bio: "Building conviction, one belief at a time.",
   followers: 128, following: 96, accuracy: 64, winRate: 58, marketsCreated: 3,
   totalWinnings: 4820, points: 18650, rank: 214, rating: "BB",

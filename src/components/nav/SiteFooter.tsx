@@ -28,7 +28,7 @@ export function SiteFooter() {
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5 font-semibold">
               <LogoMark />
-              <span>HoodSwarm</span>
+              <span>Belief Market</span>
             </div>
             <p className="mt-3 max-w-[220px] text-sm text-content-secondary">
               The Internet's Belief Network.
@@ -53,7 +53,7 @@ export function SiteFooter() {
           ))}
         </div>
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-content-secondary/60 sm:flex-row">
-          <span>© {new Date().getFullYear()} HoodSwarm. Where conviction becomes markets.</span>
+          <span>© {new Date().getFullYear()} Belief Market. Where conviction becomes markets.</span>
           <span>For research and entertainment. Play-money markets, not advice. build by @anishsarkars</span>
         </div>
       </div>

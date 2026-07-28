@@ -1,8 +1,8 @@
 {
-  "name": "hoodswarm",
+  "name": "beliefmarket",
   "version": "1.0.0",
   "private": true,
-  "description": "HoodSwarm — The Internet's Investment Belief Network.",
+  "description": "Belief Market — The Internet's Investment Belief Network.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

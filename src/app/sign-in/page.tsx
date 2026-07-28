@@ -71,7 +71,7 @@ export default function SignInPage() {
           <div className="relative">
             <div className="flex items-center gap-2.5 font-semibold">
               <LogoMark />
-              <span className="text-lg">HoodSwarm</span>
+              <span className="text-lg">Belief Market</span>
             </div>
             <p className="mt-8 text-2xl font-bold leading-tight">
               Where conviction becomes markets.
@@ -117,7 +117,7 @@ export default function SignInPage() {
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight">
-            {mode === "signup" ? "Join HoodSwarm" : "Welcome back"}
+            {mode === "signup" ? "Join Belief Market" : "Welcome back"}
           </h1>
           <p className="mt-1.5 text-sm text-content-secondary">
             {mode === "signup"
@@ -185,7 +185,7 @@ export default function SignInPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-content-secondary">
-            {mode === "signup" ? "Already have an account? " : "New to HoodSwarm? "}
+            {mode === "signup" ? "Already have an account? " : "New to Belief Market? "}
             <button
               onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
               className="text-primary hover:underline"

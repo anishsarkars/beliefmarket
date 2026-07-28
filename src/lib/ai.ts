@@ -8,7 +8,7 @@ import type {
 import { clamp } from "./utils";
 
 // ─────────────────────────────────────────────────────────────
-// HoodSwarm AI debate engine.
+// Belief Market AI debate engine.
 // Generates a 7-agent debate for a belief. Runs fully offline with
 // template synthesis; swap `generateDebate` for an OpenAI call by
 // wiring OPENAI_API_KEY in a server action.

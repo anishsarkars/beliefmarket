@@ -1,5 +1,5 @@
 -- ============================================================
--- HoodSwarm — Supabase schema
+-- Belief Market — Supabase schema
 -- Run this in the Supabase SQL Editor (Dashboard → SQL → New query).
 -- Safe to re-run.
 -- ============================================================

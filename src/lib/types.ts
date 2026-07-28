@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// HoodSwarm domain model — opinions & beliefs
+// Belief Market domain model — opinions & beliefs
 // ─────────────────────────────────────────────────────────────
 
 export type Category =

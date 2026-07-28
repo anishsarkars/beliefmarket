@@ -1,6 +1,6 @@
 import { MarketsBrowser } from "@/components/market/MarketsBrowser";
 
-export const metadata = { title: "Markets · HoodSwarm" };
+export const metadata = { title: "Markets · Belief Market" };
 
 export default function MarketsPage() {
   return (

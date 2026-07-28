@@ -33,14 +33,14 @@ export function Logo({
   return (
     <Link
       href="/"
-      aria-label="HoodSwarm home"
+      aria-label="Belief Market home"
       className={cn("flex items-center", className)}
     >
       {variant === "mark" ? (
         <LogoMark />
       ) : (
         <span className="rounded-lg border-[1.5px] border-primary px-2.5 py-1 text-[15px] font-extrabold tracking-tight text-primary">
-          HoodSwarm
+          Belief Market
         </span>
       )}
     </Link>

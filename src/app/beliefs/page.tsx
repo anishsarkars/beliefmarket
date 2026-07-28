@@ -1,7 +1,7 @@
 import { BeliefListFeed } from "@/components/thesis/ThesisListFeed";
 import { NewBeliefButton } from "@/components/thesis/NewThesisButton";
 
-export const metadata = { title: "Beliefs · HoodSwarm" };
+export const metadata = { title: "Beliefs · Belief Market" };
 
 export default function BeliefsPage() {
   return (

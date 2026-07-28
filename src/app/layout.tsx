@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HoodSwarm — The Internet's Belief Network",
+  title: "Belief Market — The Internet's Belief Network",
   description:
     "Share a belief about anything — tech, culture, sports, science, politics. AI analysts debate it, the community votes, and the strongest convictions become live prediction markets.",
   keywords: ["beliefs", "opinions", "any topic", "prediction markets", "AI debate", "conviction"],

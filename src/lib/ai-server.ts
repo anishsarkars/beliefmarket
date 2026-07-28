@@ -49,7 +49,7 @@ function normalizeStance(s: unknown): VoteSide {
   return (VALID_STANCES as string[]).includes(v) ? (v as VoteSide) : "neutral";
 }
 
-const SYSTEM_PROMPT = `You are the HoodSwarm debate engine. Given a user's belief about ANY topic (not just finance), you simulate a panel of 7 distinct AI analysts who debate whether the belief will prove true.
+const SYSTEM_PROMPT = `You are the Belief Market debate engine. Given a user's belief about ANY topic (not just finance), you simulate a panel of 7 distinct AI analysts who debate whether the belief will prove true.
 
 The 7 analysts, in order, with their leaning:
 1. Advocate — argues in favor (tends to "believe")

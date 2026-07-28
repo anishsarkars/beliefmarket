@@ -1,9 +1,9 @@
-# HoodSwarm
+# Belief Market
 
 **The Internet's Belief Network.**
 _Where conviction becomes markets._
 
-HoodSwarm turns opinions and beliefs into a debate-and-market workflow,
+Belief Market turns opinions and beliefs into a debate-and-market workflow,
 built with a premium, minimal design language. The core flow is:
 
 > **Belief → AI Debate → Community Conviction → Prediction Market**

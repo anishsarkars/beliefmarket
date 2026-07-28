@@ -2,7 +2,7 @@ import type { AgentRole } from "./types";
 
 // The debate is presented as a conversation between named personas — each of the
 // seven analyst roles maps to a stable name + avatar so the thread reads like a
-// real room debating the belief (kicked off by the HoodSwarm Engine).
+// real room debating the belief (kicked off by the Belief Market Engine).
 const NAMES: Record<AgentRole, string> = {
   Advocate: "Mason",
   Skeptic: "Victor",

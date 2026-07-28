@@ -36,7 +36,7 @@ export function AIDebate({ debate, title }: { debate: Debate; title: string }) {
 
         {roles.length > 0 && (
           <p className="mb-1 text-center text-xs text-content-secondary/50">
-            HoodSwarm Engine added {personaNames(roles)}
+            Belief Market Engine added {personaNames(roles)}
           </p>
         )}
 
@@ -138,7 +138,7 @@ function EngineMessage({ title }: { title: string }) {
         <LayoutGrid className="h-4 w-4 text-primary" />
       </span>
       <div className="min-w-0 flex-1">
-        <span className="text-sm font-semibold text-primary">HoodSwarm Engine</span>
+        <span className="text-sm font-semibold text-primary">Belief Market Engine</span>
         <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">
           Let&apos;s dive into the belief that {title}. What makes it hold up — or are we
           just caught in the hype?
