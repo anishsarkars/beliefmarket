@@ -26,6 +26,7 @@ import { convictionLabel } from "./utils";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
+  avatarFor,
   beliefRowToBelief,
   commentRowToComment,
   profileToUser,
@@ -33,6 +34,7 @@ import {
   type CommentRow,
   type ProfileRow,
 } from "@/lib/supabase/mappers";
+import type { User } from "./types";
 
 interface Position {
   marketId: string;
@@ -85,6 +87,65 @@ function requireAuth(isAuthed: boolean): boolean {
   return true;
 }
 
+/** Resolve a posting author — uses the signed-in user or silent anonymous auth. */
+async function resolvePostingAuthor(
+  supabase: ReturnType<typeof createClient>,
+  user: User | null,
+  userId: string | null
+): Promise<{ author: User; authorId: string | null }> {
+  if (user && userId) return { author: user, authorId: userId };
+
+  const { data, error } = await supabase.auth.signInAnonymously();
+  if (error || !data.user) {
+    console.error("Anonymous sign-in failed:", error?.message);
+    const guestId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `guest_${Date.now()}`;
+    return {
+      authorId: null,
+      author: profileToUser({
+        id: guestId,
+        username: "guest",
+        name: "Anonymous",
+        avatar_url: avatarFor("guest"),
+        bio: null,
+        points: 10000,
+        created_at: new Date().toISOString(),
+      }),
+    };
+  }
+
+  const authorId = data.user.id;
+
+  // Profile row is created by trigger; retry briefly in case it lags.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authorId)
+      .maybeSingle();
+
+    if (profile) {
+      return { author: profileToUser(profile as ProfileRow), authorId };
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  return {
+    authorId,
+    author: profileToUser({
+      id: authorId,
+      username: "guest",
+      name: "Anonymous",
+      avatar_url: avatarFor("guest"),
+      bio: null,
+      points: 10000,
+      created_at: new Date().toISOString(),
+    }),
+  };
+}
+
 function applyVoteToBelief(
   b: Belief,
   prevSide: VoteSide | undefined,
@@ -103,7 +164,7 @@ function applyVoteToBelief(
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
-  const { user, userId, loading: authLoading } = useAuth();
+  const { user, userId, isAnonymous, loading: authLoading } = useAuth();
 
   const [dbBeliefs, setDbBeliefs] = useState<Belief[]>([]);
   const [seedComments, setSeedComments] = useState<Record<string, Comment[]>>({});
@@ -114,7 +175,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [votes, setVotes] = useState<Record<string, VoteSide>>({});
   const [hydrated, setHydrated] = useState(false);
 
-  const isAuthed = !!userId && !!user;
+  const isAuthed = !!userId && !!user && !isAnonymous;
 
   // Beliefs shown = DB beliefs first, then seed demo beliefs (with any
   // real comments attached to them merged in).
@@ -210,7 +271,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // ── Submit a belief ────────────────────────────────────────
   const submitBelief = useCallback(
     async (input: SubmitBeliefInput): Promise<Belief | null> => {
-      if (!requireAuth(isAuthed) || !user) return null;
+      const resolved = await resolvePostingAuthor(supabase, user, userId);
+      const { author, authorId } = resolved;
 
       const seed = {
         title: input.title,
@@ -249,7 +311,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const belief: Belief = {
         id,
         ...input,
-        author: user,
+        author,
         createdAt: new Date().toISOString(),
         conviction,
         convictionLabel: convictionLabel(conviction),
@@ -261,33 +323,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
       setDbBeliefs((prev) => [belief, ...prev]);
 
-      // Persist (fire and forget; UI already updated optimistically).
-      supabase
-        .from("beliefs")
-        .insert({
-          id,
-          author_id: user.id,
-          title: input.title,
-          prediction: input.prediction,
-          topic: input.topic,
-          category: input.category,
-          time_horizon: input.timeHorizon,
-          description: input.description,
-          evidence: input.evidence,
-          sources: input.sources,
-          confidence: input.confidence,
-          risk_factors: input.riskFactors,
-          conviction,
-          conviction_label: convictionLabel(conviction),
-          status: "debating",
-          debate,
-          believe_count: 1,
-          cope_count: 0,
-          neutral_count: 0,
-        })
-        .then(({ error }) => {
-          if (error) console.error("Failed to save belief:", error.message);
-        });
+      // Persist when we have a real author id (signed-in or anonymous session).
+      if (authorId) {
+        supabase
+          .from("beliefs")
+          .insert({
+            id,
+            author_id: authorId,
+            title: input.title,
+            prediction: input.prediction,
+            topic: input.topic,
+            category: input.category,
+            time_horizon: input.timeHorizon,
+            description: input.description,
+            evidence: input.evidence,
+            sources: input.sources,
+            confidence: input.confidence,
+            risk_factors: input.riskFactors,
+            conviction,
+            conviction_label: convictionLabel(conviction),
+            status: "debating",
+            debate,
+            believe_count: 1,
+            cope_count: 0,
+            neutral_count: 0,
+          })
+          .then(({ error }) => {
+            if (error) console.error("Failed to save belief:", error.message);
+          });
+      }
 
       pushNotification({
         type: "ai-update",
@@ -297,7 +361,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       });
       return belief;
     },
-    [isAuthed, user, supabase, pushNotification]
+    [user, userId, supabase, pushNotification]
   );
 
   // ── Vote ───────────────────────────────────────────────────

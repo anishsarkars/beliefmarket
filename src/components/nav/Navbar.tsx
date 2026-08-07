@@ -23,7 +23,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { unread } = useStore();
-  const { user, signOut } = useAuth();
+  const { user, isAnonymous, signOut } = useAuth();
   const [search, setSearch] = useState(false);
   const [notif, setNotif] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -42,6 +42,8 @@ export function Navbar() {
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
+
+  const showAuthedNav = !!user && !isAnonymous;
 
   const handleSignOut = async () => {
     setProfileMenu(false);
@@ -106,7 +108,7 @@ export function Navbar() {
               <NotificationsMenu open={notif} onClose={() => setNotif(false)} />
             </div>
 
-            {user ? (
+            {showAuthedNav ? (
               <div className="relative hidden md:block">
                 <button
                   onClick={() => setProfileMenu((v) => !v)}
@@ -208,7 +210,7 @@ export function Navbar() {
                     {item.label}
                   </Link>
                 ))}
-                {user ? (
+                {showAuthedNav ? (
                   <>
                     <Link
                       href="/profile"

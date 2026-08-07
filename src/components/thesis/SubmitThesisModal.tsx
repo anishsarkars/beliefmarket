@@ -64,7 +64,6 @@ export function SubmitBeliefModal({
       confidence,
       riskFactors: [],
     });
-    // Guests are redirected to sign-in by the store; nothing to spawn.
     if (!belief) {
       setPhase("form");
       return;
@@ -102,6 +101,7 @@ export function SubmitBeliefModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="AI will write most of the world's code by 2030"
+                suppressHydrationWarning
               />
             </Field>
 
@@ -140,6 +140,7 @@ export function SubmitBeliefModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add a line of reasoning (optional)…"
+                suppressHydrationWarning
               />
             </Field>
 

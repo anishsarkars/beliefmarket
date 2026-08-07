@@ -50,7 +50,7 @@ function Saved({ show }: { show: boolean }) {
 }
 
 function ProfileSettings() {
-  const { user, loading, refreshProfile } = useAuth();
+  const { user, isAnonymous, loading, refreshProfile } = useAuth();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -70,7 +70,7 @@ function ProfileSettings() {
   if (loading) {
     return <div className="card p-6 text-sm text-content-secondary">Loading…</div>;
   }
-  if (!user) {
+  if (!user || isAnonymous) {
     return (
       <div className="card p-6">
         <p className="text-sm text-content-secondary">Sign in to manage your profile.</p>
@@ -214,7 +214,7 @@ function AppearanceSettings() {
 }
 
 function AccountSettings() {
-  const { user, email, signOut } = useAuth();
+  const { user, isAnonymous, email, signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -223,7 +223,7 @@ function AccountSettings() {
     router.refresh();
   };
 
-  if (!user) {
+  if (!user || isAnonymous) {
     return (
       <div className="card p-6">
         <p className="text-sm text-content-secondary">You are browsing as a guest.</p>

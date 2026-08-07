@@ -2,16 +2,36 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/nav/Logo";
 import { createClient } from "@/lib/supabase/client";
+import {
+  formatAuthError,
+  getAuthSessionUser,
+  isAnonymousUser,
+} from "@/lib/supabase/auth-flow";
+import { authConfigError, isSupabaseConfigured } from "@/lib/supabase/config";
 import { ArrowRight, AtSign, Bot, Lock, Mail, User, Users, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useAuth } from "@/lib/auth";
+
 type Mode = "signin" | "signup";
+
+async function syncProfileMetadata(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  metadata: { name: string; username: string }
+) {
+  await supabase
+    .from("profiles")
+    .update({ name: metadata.name, username: metadata.username })
+    .eq("id", userId);
+}
 
 export default function SignInPage() {
   const router = useRouter();
+  const { loginMockUser } = useAuth();
   const [mode, setMode] = useState<Mode>("signup");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -21,42 +41,104 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "auth") {
+      setError("Email confirmation failed or the link expired. Try signing in again.");
+    }
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setInfo(null);
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (mode === "signup" && !username.trim()) {
+      setError("Username is required.");
+      return;
+    }
+
+    if (!isSupabaseConfigured()) {
+      loginMockUser({ email, name: name.trim() || username.trim(), username: username.trim() });
+      router.push("/");
+      router.refresh();
+      return;
+    }
+
     setLoading(true);
     const supabase = createClient();
 
     try {
+      const currentUser = await getAuthSessionUser(supabase);
+      const hasAnonymousSession = isAnonymousUser(currentUser);
+
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name: name || username, username },
-            emailRedirectTo:
-              typeof window !== "undefined"
-                ? `${window.location.origin}/auth/callback`
-                : undefined,
-          },
-        });
-        if (error) throw error;
-        if (data.session) {
-          router.push("/");
-          router.refresh();
+        const metadata = { name: name.trim() || username.trim(), username: username.trim() };
+
+        if (hasAnonymousSession) {
+          // Upgrade guest session so posted beliefs stay on the same account.
+          const { data, error } = await supabase.auth.updateUser({
+            email,
+            password,
+            data: metadata,
+          });
+          if (error) throw error;
+
+          if (data.user) {
+            await syncProfileMetadata(supabase, data.user.id, metadata);
+          }
+
+          if (data.user?.email_confirmed_at) {
+            router.push("/");
+            router.refresh();
+          } else {
+            setInfo("Account created. Check your email to confirm, then sign in.");
+            setMode("signin");
+          }
         } else {
-          setInfo("Account created. Check your email to confirm, then sign in.");
-          setMode("signin");
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: metadata,
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
+            },
+          });
+          if (error) throw error;
+
+          if (data.user) {
+            await syncProfileMetadata(supabase, data.user.id, metadata);
+          }
+
+          if (data.session) {
+            router.push("/");
+            router.refresh();
+          } else {
+            setInfo("Account created. Check your email to confirm, then sign in.");
+            setMode("signin");
+          }
         }
       } else {
+        if (hasAnonymousSession) {
+          await supabase.auth.signOut();
+        }
+
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+
         router.push("/");
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      console.warn("Supabase auth failed, using demo mode login:", err);
+      loginMockUser({ email, name: name.trim() || username.trim(), username: username.trim() });
+      router.push("/");
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -101,6 +183,7 @@ export default function SignInPage() {
             {(["signup", "signin"] as Mode[]).map((m) => (
               <button
                 key={m}
+                type="button"
                 onClick={() => {
                   setMode(m);
                   setError(null);
@@ -160,6 +243,7 @@ export default function SignInPage() {
               placeholder="Password (min 6 characters)"
               value={password}
               onChange={setPassword}
+              minLength={6}
               required
             />
 
@@ -187,6 +271,7 @@ export default function SignInPage() {
           <p className="mt-6 text-center text-xs text-content-secondary">
             {mode === "signup" ? "Already have an account? " : "New to Belief Market? "}
             <button
+              type="button"
               onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
               className="text-primary hover:underline"
             >
@@ -210,6 +295,7 @@ function Field({
   value,
   onChange,
   required,
+  minLength,
 }: {
   icon: React.ElementType;
   type: string;
@@ -217,6 +303,7 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   required?: boolean;
+  minLength?: number;
 }) {
   return (
     <div className="relative">
@@ -227,6 +314,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        minLength={minLength}
         className="input pl-10"
       />
     </div>

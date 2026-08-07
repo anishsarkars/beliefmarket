@@ -2,6 +2,9 @@
 -- Belief Market — Supabase schema
 -- Run this in the Supabase SQL Editor (Dashboard → SQL → New query).
 -- Safe to re-run.
+--
+-- Guest belief posting uses Supabase Anonymous Sign-Ins.
+-- Enable: Authentication → Providers → Anonymous Sign-Ins → ON
 -- ============================================================
 
 -- ---------- PROFILES ----------
@@ -42,7 +45,7 @@ declare
 begin
   base_username := coalesce(
     nullif(new.raw_user_meta_data->>'username', ''),
-    split_part(new.email, '@', 1)
+    case when new.email is not null and new.email <> '' then split_part(new.email, '@', 1) else null end
   );
   base_username := lower(regexp_replace(base_username, '[^a-zA-Z0-9_]', '', 'g'));
   if base_username is null or base_username = '' then
@@ -59,7 +62,10 @@ begin
   values (
     new.id,
     final_username,
-    coalesce(nullif(new.raw_user_meta_data->>'name', ''), final_username),
+    coalesce(
+      nullif(new.raw_user_meta_data->>'name', ''),
+      case when new.email is null or new.email = '' then 'Anonymous' else final_username end
+    ),
     'https://api.dicebear.com/7.x/thumbs/svg?seed=' || final_username ||
       '&backgroundColor=111111,0d0d0d,1a1a1a'
   );

@@ -54,7 +54,17 @@ export function SiteFooter() {
         </div>
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-content-secondary/60 sm:flex-row">
           <span>© {new Date().getFullYear()} Belief Market. Where conviction becomes markets.</span>
-          <span>For research and entertainment. Play-money markets, not advice. build by @anishsarkars</span>
+          <span>
+            For research and entertainment. Play-money markets, not advice. Made by{" "}
+            <a
+              href="https://github.com/anishsarkars"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-content-secondary transition-colors hover:text-primary"
+            >
+              @anishsarkars
+            </a>
+          </span>
         </div>
       </div>
     </footer>

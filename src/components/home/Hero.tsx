@@ -72,6 +72,7 @@ export function Hero() {
                 }}
                 rows={2}
                 placeholder={EXAMPLES[exampleIdx]}
+                suppressHydrationWarning
                 className="max-h-40 min-h-[64px] w-full resize-none bg-transparent px-4 pt-3 pb-12 text-base text-white outline-none placeholder:text-content-secondary/60"
               />
               <div className="absolute inset-x-3 bottom-3 flex items-center justify-end">

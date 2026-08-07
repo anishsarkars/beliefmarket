@@ -6,12 +6,12 @@ import { ProfileView } from "@/components/profile/ProfileView";
 import { useAuth } from "@/lib/auth";
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, isAnonymous, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/sign-in");
-  }, [loading, user, router]);
+    if (!loading && (!user || isAnonymous)) router.replace("/sign-in");
+  }, [loading, user, isAnonymous, router]);
 
   if (loading) {
     return (
